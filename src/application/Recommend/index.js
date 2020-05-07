@@ -1,13 +1,17 @@
 import React from 'react';
+
 import Slider from '../../components/slider/index';
 import RecommendList from '../../components/list/index';
+import Scroll from '../../baseUrl/scroll/index.jsx';
+
+import {Content} from './style'
 
 function Recommend (props) {
   const bannerList = [1,2,3,4].map (item => {
     return { imageUrl: "http://p1.music.126.net/ZYLJ2oZn74yUz5x8NBGkVA==/109951164331219056.jpg" }
   });
 
-  const recommendList = [1,2,3,4,5,6,7,8,1,0,10, 3].map(item => (
+  const recommendList = [1,2,3,4,5,6,7,8,11,0,10, 13].map(item => (
     {
       id: 1,
       picUrl: "https://p1.music.126.net/fhmefjUfMD-8qtj3JKeHbA==/18999560928537533.jpg",
@@ -16,10 +20,14 @@ function Recommend (props) {
     }
   ))
   return (
-    <div>
-      <Slider bannerList={bannerList}/>
-      <RecommendList recommendList={recommendList}/>
-    </div>
+    <Content>
+      <Scroll className="list">
+        <div>
+          <Slider bannerList={bannerList}/>
+          <RecommendList recommendList={recommendList}/>
+        </div>
+      </Scroll>
+    </Content>
   )
 }
 

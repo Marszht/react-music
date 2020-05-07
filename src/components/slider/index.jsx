@@ -17,11 +17,17 @@ function Slider (props) {
           delay: 3000,
           disableOnInteraction: false
         },
-        pagination: {el: '.swiper-pagination'},
+        effect :'coverflow',
+        pagination: {
+          el: '.swiper-pagination',
+          dynamicBullets: true
+        },
       });
       setSliderSwiper(newSliderSwiper);
     }
-  }, [bannerList, sliderSwiper])
+  }, [bannerList, sliderSwiper]);
+
+ 
   return (
     <SliderContainer>
       <div className="before"></div>
