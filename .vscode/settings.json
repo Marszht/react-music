@@ -1,0 +1,8 @@
+{
+  "eslint.codeAction.disableRuleComment": {
+    "location": "sameLine"
+  
+  },
+  "eslint.format.enable": true,
+  "eslint.alwaysShowStatus": true
+}
