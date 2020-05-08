@@ -1,34 +1,66 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+import { renderRoutes } from 'react-router-config';
+import { forceCheck } from 'react-lazyload';
 
 import Slider from '../../components/slider/index';
 import RecommendList from '../../components/list/index';
 import Scroll from '../../baseUrl/scroll/index.jsx';
+import Loading from '../../baseUrl/loading/index';
+
+import * as actionTypes from './store/actionCreators';
 
 import {Content} from './style'
 
 function Recommend (props) {
-  const bannerList = [1,2,3,4].map (item => {
-    return { imageUrl: "http://p1.music.126.net/ZYLJ2oZn74yUz5x8NBGkVA==/109951164331219056.jpg" }
-  });
+  const { bannerList, recommendList, enterLoading } = props;
+  const { getBannerDataDispatch, getRecommendListDataDispatch } = props;
 
-  const recommendList = [1,2,3,4,5,6,7,8,11,0,10, 13].map(item => (
-    {
-      id: 1,
-      picUrl: "https://p1.music.126.net/fhmefjUfMD-8qtj3JKeHbA==/18999560928537533.jpg",
-      playCount: 17171122,
-      name: "朴树、许巍、李健、郑钧、老狼、赵雷"
+  useEffect (() => {
+    if (!bannerList.size) {
+      getBannerDataDispatch();
     }
-  ))
+    if (!recommendList.size) {
+      getRecommendListDataDispatch();
+    }
+  // eslint-disable-next-line
+  }, []);
+
+  const bannerListJS = bannerList ? bannerList.toJS() : [];
+  const recommendListJS = recommendList ? recommendList.toJS() : [];
+
   return (
     <Content>
-      <Scroll className="list">
+      <Scroll className="list" onScroll={forceCheck}>
         <div>
-          <Slider bannerList={bannerList}/>
-          <RecommendList recommendList={recommendList}/>
+          <Slider bannerList={bannerListJS}/>
+          <RecommendList recommendList={recommendListJS}/>
         </div>
       </Scroll>
+      { renderRoutes(props.route.routes) }
+     { enterLoading && <Loading />}
     </Content>
   )
 }
 
-export default React.memo(Recommend);
+
+// 映射Redux 全局的state 到组件的props
+const mapStateToProps = (state) => {
+  return{
+  bannerList: state.getIn(['recommend', 'bannerList']),
+  recommendList: state.getIn(['recommend', 'recommendList']),
+  enterLoading: state.getIn(['recommend', 'enterLoading'])
+}};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    getBannerDataDispatch() {
+      dispatch(actionTypes.getBannerList());
+    },
+    getRecommendListDataDispatch() {
+      dispatch(actionTypes.getRecommendList());
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(React.memo(Recommend));

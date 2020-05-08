@@ -3,7 +3,7 @@ import PropTypes from "prop-types"
 import BScroll from "better-scroll"
 import styled from'styled-components';
 
-const scrollContaniner = styled.div`
+const ScrollContaniner = styled.div`
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -29,6 +29,8 @@ const {
 } = props;
 
 useEffect(() => {
+
+  // 实例化 BScroll
   const scroll = new BScroll(scrollContaninerRef.current, {
     scrollX: direction === 'horizental',
     scrollY: direction === 'vertical',
@@ -45,12 +47,15 @@ useEffect(() => {
   }
 }, []);
 
+
+// 当dom 结构发生变化时 刷新， 保证滚动效果正常 
 useEffect(() => {
   if (refresh && bScroll) {
     bScroll.refresh();
   }
 });
 
+// 绑定 scroll 事件
 useEffect(() => {
   if (!bScroll || !onScroll) return;
   bScroll.on('scroll', (scroll) => {
@@ -59,12 +64,58 @@ useEffect(() => {
   return () => {
     bScroll.off('scroll')
   }
-}, [onScroll, bScroll])
+}, [onScroll, bScroll]);
+
+// 进行上拉到底的判断，调用上拉刷新函数
+useEffect(() => {
+  if (!bScroll || !pullUp) return;
+  bScroll.on('scrollEnd', () => {
+    // 判断是否滑动到了底部
+    if (bScroll.y <= bScroll.maxScrollY + 100){
+      pullUp ();
+    }
+  });
+  return () => {
+    bScroll.off('scrollEnd');
+  }
+}, [pullUp, bScroll]);
+
+// 下拉刷新
+useEffect(() => {
+  if (!bScroll || !pullDown) return;
+  bScroll.on('touchEnd', (pos) => {
+    // 判断是否滑动到了底部
+    // 判断用户的下拉动作
+    if (pos.y > 50) {
+      pullDown ();
+    }
+  });
+  return () => {
+    bScroll.off('touchEnd');
+  }
+}, [pullDown, bScroll]);
+
+// 一般和 forwardRef 一起使用，ref 已经在 forWardRef 中默认传入
+useImperativeHandle (ref, () => ({
+  // 给外界暴露 refresh 方法
+  refresh () {
+    if (bScroll) {
+      bScroll.refresh ();
+      bScroll.scrollTo (0, 0);
+    }
+  },
+  // 给外界暴露 getBScroll 方法，提供 bs 实例
+  getBScroll () {
+    if (bScroll) {
+      return bScroll;
+    }
+  }
+}));
 
 return (
-  <scrollContaniner ref={scrollContaninerRef}>
+  <ScrollContaniner ref={scrollContaninerRef}>
     {props.children}
-  </scrollContaniner>
+  </ScrollContaniner>
 )
 })
 
@@ -83,7 +134,7 @@ Scroll.defaultProps = {
 
 Scroll.propTypes = {
   direction: PropTypes.oneOf (['vertical', 'horizental']),// 滚动的方向
-  click: true, // 是否支持点击
+  click: PropTypes.bool, // 是否支持点击
   refresh: PropTypes.bool, // 是否刷新
   onScroll: PropTypes.func, // 滑动触发的回调
   pullUp: PropTypes.func, // 上拉加载逻辑
@@ -94,5 +145,5 @@ Scroll.propTypes = {
   bounceBottom: PropTypes.bool// 是否支持向下吸底
 }
 
-export default React.memo(Scroll);
+export default Scroll;
 

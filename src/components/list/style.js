@@ -69,8 +69,18 @@ export const ListItem = styled.div`
   .desc {
     overflow: hidden;
     margin-top: 2px;
+    margin-bottom: 10px;
     padding: 0 2px;
-    height: 50px;
+    max-height: 50px;
+
+   display: -webkit-box;
+   display: box;
+   -webkit-box-orient: vertical;
+   box-orient: vertical;
+   word-break: break-all;
+   -webkit-line-clamp: 2;
+   line-clamp: 2;
+
 
     text-align: left;
     font-size: ${style['font-size-s']};
