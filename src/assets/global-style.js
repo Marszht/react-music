@@ -27,6 +27,7 @@ const bgFull = () => {
 
 export default {
   "theme-color": "#d44439",
+  "theme-color-light": "#d86e6e",
   "theme-color-shadow": "rgba(212, 68, 57, .5)",
   "font-color-light": "#f1f1f1",
   "font-color-light-shadow": "rgba(241, 241, 241, 0.6)",//略淡
