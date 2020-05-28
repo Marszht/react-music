@@ -2,19 +2,29 @@ import { fromJS } from 'immutable';
 
 import {
   CHANGE_SINGER_LIST,
-  CHANGE_CATOGORY,
   CHANGE_ALPHA,
   CHANGE_PAGE_COUNT,
   CHANGE_PULLUP_LOADING,
   CHANGE_PULLDOWN_LOADING,
   CHANGE_ENTER_LOADING,
-  CHANGE_LIST_OFFSET
+  CHANGE_LIST_OFFSET,
+  CHANGE_CATEGORY,
 } from './actionTypes';
 
 import {
   getHotSingerListRequest,
   getSingerListRequest
 } from "../../../api/request";
+
+export const changeCategory = (data) => ({
+  type: CHANGE_CATEGORY,
+  data,
+});
+
+export const changeAlpha = (data) => ({
+  type: CHANGE_ALPHA,
+  data,
+});
 
 const changeSingerList = (data) => ({
   type: CHANGE_SINGER_LIST,
@@ -63,10 +73,9 @@ export const getHotSingerList = () => {
 // 加载更多热门歌手
 export const refreshMoreHotSingerList = () => {
   return (dispatch, getState) => {
-    const pageCount = getState().getIn(['singers', 'pageCount']);
-    const singerList = getState().getIn(['singers', 'singerList']);
-    console.log({pageCount})
-    getHotSingerListRequest(pageCount).then(res => {
+    const offset = getState().getIn(['singers', 'listOffset']);
+    const singerList = getState().getIn(['singers', 'singerList']).toJS();
+    getHotSingerListRequest(offset).then(res => {
       const data = [...singerList, ...res.artists];
       dispatch(changeSingerList(data));
       dispatch(changePullUpLoading(false));
@@ -80,7 +89,10 @@ export const refreshMoreHotSingerList = () => {
 // 加载对应类别歌手
 export const getSingerList = (category, alpha) => {
   return (dispatch, getState) => {
-    getSingerListRequest(category, alpha, 0).then(res => {
+    const offset = getState().getIn(['singers', 'listOffset']);
+    const category = getState().getIn(['singers', 'category']);
+    const alpha = getState().getIn(['singers', 'alpha']);
+    getSingerListRequest(category, alpha, offset).then(res => {
       const data = res.artists;
       dispatch(changeSingerList(data));
       dispatch(changeEnterLoading(false));
@@ -94,12 +106,13 @@ export const getSingerList = (category, alpha) => {
 // 加载更多歌手
 export const refreshMoreSingerList = (category, alpha) => {
   return (dispatch, getState) => {
-    const pageCount = getState().getIn(['singers', 'pageCount']);
+    const offset = getState().getIn(['singers', 'listOffset']);
     const singerList = getState().getIn(['singers', 'singerList']);
-    getHotSingerListRequest(category, alpha, pageCount).then(res => {
+    getHotSingerListRequest(category, alpha, offset).then(res => {
       const data = [...singerList, ...res.artists];
       dispatch(changeSingerList(data));
-      dispatch(changePullUpLoading(false))
+      dispatch(changePullUpLoading(false));
+      dispatch(changeListOffset(data.length));
     }).catch(() => {
       console.log('歌手数据获取失败')
     })

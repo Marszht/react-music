@@ -10,7 +10,9 @@ import {
   refreshMoreSingerList, 
   changePullUpLoading, 
   changePullDownLoading, 
-  refreshMoreHotSingerList 
+  refreshMoreHotSingerList,
+  changeCategory,
+  changeAlpha
 } from './store/actionCreators';
 import { categoryTypes, alphaTypes }  from '../../api/config';
 
@@ -22,11 +24,16 @@ import Loading from '../../baseUrl/loading/index';
 import { NavContainer, ListContainer, ListItem, List } from './style';
 
 function Singers (props) {
-  const [category, setCategory] = useState('');
-  const [alpha, setAlpha] = useState('HOT');
 
-  const {singerList, enterLoading, pageCount } = props;
-  const { getHotSingerDispatch, updateDispatch, updateHotDispatch, pullUpRefreshDispatch } = props;
+
+  const {singerList, enterLoading, pageCount, alpha, category, listOffset } = props;
+  const { 
+    getHotSingerDispatch, 
+    updateHotDispatch, 
+    pullUpRefreshDispatch,
+    updateCategory,
+    updateApha
+  } = props;
 
 
 
@@ -40,22 +47,16 @@ function Singers (props) {
 
  let handleUpdateCatetory = (val) => {
    if (val === category) return;
-   setCategory(val);
-   updateDispatch(val, alpha);
+   updateCategory(val);
  }
 
  let handleUpdateAlpha = (val) => {
    if (val === alpha) return;
-   setAlpha(val);
-   if(val === 'HOT') {
-    updateHotDispatch();
-  } else {
-    updateDispatch(category, val )
-  }
+   updateApha(val);
  }
 
  const handlePullUp = () => {
-  pullUpRefreshDispatch(category, alpha, pageCount)
+  pullUpRefreshDispatch(category, alpha, listOffset)
  }
 
  const singerListJS = singerList ? singerList.toJS() : [];
@@ -118,6 +119,8 @@ function Singers (props) {
 }
 
 const mapStateToProps = (state) => ({
+  alpha: state.getIn(['singers', 'alpha']),
+  category: state.getIn(['singers', 'category']),
   singerList: state.getIn(['singers', 'singerList']),
   enterLoading: state.getIn(['singers', 'enterLoading']),
   pageCount: state.getIn(['singers', 'pageCount'])
@@ -125,27 +128,34 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    // 获取热门歌手
     getHotSingerDispatch() {
       dispatch(getHotSingerList());
     },
-    updateDispatch(category, alpha) {
-      dispatch(changePageCount(0));
-      dispatch(changeEnterLoading(true));
-      dispatch(getSingerList(category, alpha));
+    updateCategory (newVal) {
+      dispatch(changeCategory(newVal));
+      dispatch(getSingerList());
+    },
+
+    updateApha(newVal) {
+      dispatch(changeAlpha(newVal));
+      if (newVal === 'HOT') {
+        dispatch(getHotSingerList());
+      }else {
+        dispatch(getSingerList());
+      }
     },
     updateHotDispatch () {
       dispatch(changePageCount(0));
       dispatch(changeEnterLoading(true));
       dispatch(getHotSingerList());
     },
-    pullUpRefreshDispatch(category, alpha, count) {
-      console.log({count});
+    pullUpRefreshDispatch(category, alpha, listOffset) {
       dispatch(changePullUpLoading(true));
-      dispatch(changePageCount(count + 1));
       if (alpha === 'HOT') {
         dispatch(refreshMoreHotSingerList());
       } else {
-        dispatch(refreshMoreSingerList(category, alpha));
+        dispatch(refreshMoreSingerList());
       }
     }
   }
